@@ -30,12 +30,38 @@ Deltas always sit **left** of totals for consistent visual flow. The fullwidth `
 
 ## Install (Windows · PowerShell)
 
-1. **Copy** `statusline.ps1` into your Claude Code config directory:
-   ```powershell
-   Copy-Item .\statusline.ps1 $env:USERPROFILE\.claude\statusline.ps1
-   ```
+```powershell
+git clone https://github.com/StChiotis/claude-realtime-dashboard
+cd claude-realtime-dashboard
+.\install.ps1
+```
 
-2. **Edit** `~/.claude/settings.json` (or merge into your existing config):
+Then restart Claude Code. That's it.
+
+If PowerShell execution policy blocks the script, use:
+```powershell
+powershell -ExecutionPolicy Bypass -File .\install.ps1
+```
+
+**What the installer does:**
+- Copies `statusline.ps1` to `~/.claude/statusline.ps1`
+- Merges the `statusLine` block into `~/.claude/settings.json` — preserves every other setting you already have, and backs up the file (`settings.json.backup-<timestamp>`) before touching it
+- Tells you to restart Claude Code
+
+## Uninstall
+
+```powershell
+.\uninstall.ps1
+```
+
+Removes `~/.claude/statusline.ps1` and strips only the `statusLine` block from your settings. All other settings are preserved, and the settings file is backed up first.
+
+## Manual install (alternative)
+
+If you prefer to do the work yourself or want to inspect each step:
+
+1. Copy `statusline.ps1` to `~/.claude/statusline.ps1`
+2. Add this block to `~/.claude/settings.json`:
    ```json
    {
      "statusLine": {
@@ -45,10 +71,7 @@ Deltas always sit **left** of totals for consistent visual flow. The fullwidth `
    }
    ```
    Replace `YOUR_NAME` with your Windows username.
-
-3. **Restart** Claude Code. The dashboard renders after each turn.
-
-That's it.
+3. Restart Claude Code.
 
 ## Requirements
 
