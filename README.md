@@ -67,7 +67,14 @@ That's it.
 ## Configuration
 
 ### Model pricing
-Prices are hardcoded for **Opus 4.7** (per 1M tokens: input $15 · cache-write $18.75 · cache-read $1.50 · output $75). To use with another model, edit the constants near the `Per-turn cost (USD)` comment in `statusline.ps1`.
+Rates are resolved per current model via `Get-ModelRates` in `statusline.ps1`. Supported out of the box (per 1M tokens, verified against the [Anthropic pricing page](https://platform.claude.com/docs/en/docs/about-claude/pricing)):
+
+| Model | Input | 5m Cache Write | Cache Read | Output |
+|---|---|---|---|---|
+| Opus 4.7 / 4.6 / 4.5 | $5 | $6.25 | $0.50 | $25 |
+| Sonnet 4.6 / 4.5 / 4 | $3 | $3.75 | $0.30 | $15 |
+
+Unrecognized models fall back to the Opus 4.5+ rate. To add another model (e.g. Haiku 4.5 at $1 / $1.25 / $0.10 / $5, or legacy Opus 4 / 4.1 at $15 / $18.75 / $1.50 / $75), append a branch to `Get-ModelRates` before the fallback.
 
 ### Colors
 ANSI SGR codes appear inline next to each `Wrap` call. Common edits:
@@ -91,7 +98,7 @@ Bars are 10 cells. Search `Pct / 10.0` and `* 10` in `Make-Bar` to change densit
 ## Limitations
 
 - Windows + PowerShell only by design (no Mac/Linux port planned)
-- Pricing hardcoded to Opus 4.7
+- Pricing covers Opus 4.5+ and Sonnet families; other models fall back to Opus rates until you add them
 - Doesn't render in VS Code's native Claude Code extension chat panel — terminal `claude` only
 - No persistent state — sparklines / multi-session trends would need a state file
 

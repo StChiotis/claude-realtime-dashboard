@@ -87,6 +87,26 @@ function Make-Bar {
     $e = 10 - $f
     return $bLEdg + ($bFull * $f) + ($bEmpty * $e) + $bREdg
 }
+
+# Per-million-token rates by model, returned as @{ in; cc; cr; out }.
+# Verified against the Anthropic pricing page on 2026-05-12. Note: Opus 4.5+
+# uses the NEW lower tier ($5/$25 input/output), not the legacy Opus 4/4.1
+# rate of $15/$75. To add a model, append another branch with its quartet.
+function Get-ModelRates {
+    param([string]$ModelId, [string]$ModelDisplay)
+    $tag = ($ModelId + ' ' + $ModelDisplay).ToLower()
+    # Opus 4.5 / 4.6 / 4.7 — new lower tier
+    if ($tag -match 'opus[\s._-]*4[\s._-]*[567]' -or $tag -match 'opus-4-[567]') {
+        return @{ in = 5.0;  cc = 6.25;  cr = 0.50; out = 25.0 }
+    }
+    # Sonnet (3.7 / 4 / 4.5 / 4.6 — same rate across this family)
+    if ($tag -match 'sonnet') {
+        return @{ in = 3.0;  cc = 3.75;  cr = 0.30; out = 15.0 }
+    }
+    # Conservative fallback: assume new-tier Opus pricing. If you use Haiku
+    # or legacy Opus 4/4.1, add a branch above this line.
+    return @{ in = 5.0; cc = 6.25; cr = 0.50; out = 25.0 }
+}
 $raw = [Console]::In.ReadToEnd()
 try { $data = $raw | ConvertFrom-Json } catch { return }
 
@@ -275,10 +295,10 @@ if (-not $perMsgLabel) { $perMsgLabel = $bigPlus + '0' }
 if ($null -eq $cost)   { $cost = 0 }
 
 # --- Per-turn cost (USD) ---
-# Computed from this turn's token usage at Opus 4.7 API rates (per 1M tokens):
-#   input $15  ·  cache_create $18.75  ·  cache_read $1.50  ·  output $75
-# If you switch model, update these constants.
-$turnCost = ($turnIn * 15.0 + $turnCC * 18.75 + $turnCR * 1.50 + $turnOut * 75.0) / 1000000.0
+# Rates resolved per current model via Get-ModelRates (defined above), so the
+# delta tracks reality across model switches.
+$rates = Get-ModelRates $data.model.id $data.model.display_name
+$turnCost = ($turnIn * $rates.in + $turnCC * $rates.cc + $turnCR * $rates.cr + $turnOut * $rates.out) / 1000000.0
 
 # --- Subscription rate limits (Pro/Max only, present after first API response) ---
 $limits = ''
