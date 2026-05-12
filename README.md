@@ -2,8 +2,7 @@
 
 A polished, info-dense statusline for [Claude Code](https://claude.com/claude-code) — turns the default one-liner into a real-time dashboard with per-turn token deltas, per-turn cost, threshold-colored progress bars, rate-limit countdowns, and a tier-coded effort indicator.
 
-![preview](preview.png)
-<!-- Replace preview.png with an actual screenshot of your statusline after install. -->
+![Claude Realtime Dashboard — annotated screenshot showing per-turn deltas and per-session totals](assets/claude-dash.png)
 
 ## What it shows
 
